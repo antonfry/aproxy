@@ -1,0 +1,7 @@
+Package: DEB_PACKAGE_NAME
+Version: DEB_PACKAGE_VERSION
+Section: misc
+Architecture: amd64
+Maintainer: agn1
+Description: UDP load balancer
+Homepage: localhost

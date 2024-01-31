@@ -1,0 +1,17 @@
+server:
+  workers: 1
+  loglevel: DEBUG
+  host: "127.0.0.1"
+  port: 9600
+  buffer: 2048
+healthcheck:
+  proto: HTTP
+  port: 9600
+  interval: 5
+  timeout: 1
+  uri:
+targetgroup:
+  port: 9600
+  ### only UDP supported atm
+  proto: UDP
+  backends: []
