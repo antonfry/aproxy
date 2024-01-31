@@ -166,6 +166,7 @@ L:
 			_, err = targetConn.Conn.Write(b[0:n])
 			if err != nil {
 				s.logger.WithError(err).Errorf("Fail to write into: %s", targetConn.Conn.RemoteAddr().String())
+				targetConn.SetDead()
 				continue
 			}
 		}

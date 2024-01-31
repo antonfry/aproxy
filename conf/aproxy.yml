@@ -14,4 +14,4 @@ targetgroup:
   port: 9600
   ### only UDP supported atm
   proto: UDP
-  backends: []
+  backends: ["172.16.51.192", "172.16.51.220", "172.16.51.189", "172.16.51.191", "172.16.51.190", "172.16.51.201"]
