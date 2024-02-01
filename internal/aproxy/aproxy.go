@@ -1,7 +1,9 @@
 package aproxy
 
 import (
+	"aproxy/internal/backend"
 	"aproxy/internal/roundrobin"
+	"aproxy/internal/targetgroup"
 	"net"
 	"os"
 	"os/signal"
@@ -23,12 +25,14 @@ type Logger interface {
 }
 
 type Sender interface {
+	Next() (*backend.UDPBackend, error)
+	GetTagetGroup() *targetgroup.TargetGroup
 }
 
 // server is the main server struct
 type server struct {
 	logger      Logger
-	BackendPool *roundrobin.Pool
+	BackendPool Sender
 	ListenConn  Listener
 	config      *Config
 	shutdown    chan struct{}
@@ -50,16 +54,16 @@ func (s *server) Start() error {
 	if err = s.configureLogger(); err != nil {
 		return err
 	}
-	s.logger.Info("Starting HealthCheck. ", s.BackendPool.TargetGroup.HealthCheck)
+	s.logger.Info("Starting HealthCheck. ", s.BackendPool.GetTagetGroup().HealthCheck)
 	go s.healthCheckWorker()
 	s.logger.Info("Binding socket: ", s.config.Host, s.config.Port)
 	s.ListenConn, err = s.udpServer()
 	if err != nil {
 		return err
 	}
-	for _, b := range s.BackendPool.TargetGroup.Backends {
+	for _, b := range s.BackendPool.GetTagetGroup().Backends {
 		s.logger.Info("Setup backend connection: ", b.Host)
-		if err := b.GetConn(); err != nil {
+		if err := b.SetupConn(); err != nil {
 			return err
 		}
 	}
@@ -68,8 +72,8 @@ func (s *server) Start() error {
 		go s.worker()
 	}
 	s.logger.Info("Aproxy started listen with config: ", s.config)
-	s.logger.Info("Target group: ", s.BackendPool.TargetGroup.Backends)
-	s.logger.Info("HealthCheck: ", s.BackendPool.TargetGroup.HealthCheck)
+	s.logger.Info("Target group: ", s.BackendPool.GetTagetGroup().Backends)
+	s.logger.Info("HealthCheck: ", s.BackendPool.GetTagetGroup().HealthCheck)
 	go s.gracefullShutdown()
 	<-s.shutdown
 	return s.Stop()
@@ -77,7 +81,7 @@ func (s *server) Start() error {
 
 // Stop stops server
 func (s *server) Stop() error {
-	for _, h := range s.BackendPool.TargetGroup.Backends {
+	for _, h := range s.BackendPool.GetTagetGroup().Backends {
 		if h != nil {
 			if err := h.Close(); err != nil {
 				s.logger.Error("Unable to close connection: ", err.Error())
@@ -130,13 +134,13 @@ func (s *server) udpServer() (*net.UDPConn, error) {
 
 // healthCheckWorker make healchecks
 func (s *server) healthCheckWorker() {
-	healchCheckTicker := time.NewTicker(s.BackendPool.TargetGroup.HealthCheck.Interval)
+	healchCheckTicker := time.NewTicker(s.BackendPool.GetTagetGroup().HealthCheck.Interval)
 L:
 	for {
 		select {
 		case <-healchCheckTicker.C:
 			s.logger.Debug("HealthCheck started")
-			if err := s.BackendPool.TargetGroup.Check(); err != nil {
+			if err := s.BackendPool.GetTagetGroup().Check(); err != nil {
 				s.logger.Error("Healcheck failed: ", err.Error())
 			}
 		case <-s.shutdown:

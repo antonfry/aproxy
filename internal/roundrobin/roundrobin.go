@@ -21,6 +21,10 @@ func New(tg *targetgroup.TargetGroup) *Pool {
 	}
 }
 
+func (p *Pool) GetTagetGroup() *targetgroup.TargetGroup {
+	return p.TargetGroup
+}
+
 func (p *Pool) Next() (*backend.UDPBackend, error) {
 	if len(p.TargetGroup.Backends) == 0 {
 		return nil, ErrNoAliveUDPBackends

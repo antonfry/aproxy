@@ -26,7 +26,7 @@ func (b *UDPBackend) String() string {
 	return fmt.Sprint("Host: ", b.Host)
 }
 
-func (b *UDPBackend) GetConn() error {
+func (b *UDPBackend) SetupConn() error {
 	host, err := net.ResolveUDPAddr("udp", net.JoinHostPort(b.Host, b.Port))
 	if err != nil {
 		return err
