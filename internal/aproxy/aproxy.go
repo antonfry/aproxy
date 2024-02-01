@@ -11,11 +11,25 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+type Listener interface {
+	ReadFrom(b []byte) (int, net.Addr, error)
+}
+
+type Logger interface {
+	Debug(args ...interface{})
+	Info(args ...interface{})
+	Error(args ...interface{})
+	SetLevel(log.Level)
+}
+
+type Sender interface {
+}
+
 // server is the main server struct
 type server struct {
-	logger      *log.Logger
+	logger      Logger
 	BackendPool *roundrobin.Pool
-	ListenConn  *net.UDPConn
+	ListenConn  Listener
 	config      *Config
 	shutdown    chan struct{}
 }
@@ -66,7 +80,7 @@ func (s *server) Stop() error {
 	for _, h := range s.BackendPool.TargetGroup.Backends {
 		if h != nil {
 			if err := h.Close(); err != nil {
-				s.logger.WithError(err).Error("Unable to close connection")
+				s.logger.Error("Unable to close connection: ", err.Error())
 			}
 		}
 	}
@@ -91,7 +105,7 @@ func (s *server) gracefullShutdown() {
 	for {
 		func() {
 			sig := <-sigs
-			s.logger.Infof("Got os signal: %v", sig)
+			s.logger.Info("Got os signal: ", sig.String())
 			s.shutdown <- struct{}{}
 		}()
 	}
@@ -102,13 +116,13 @@ func (s *server) udpServer() (*net.UDPConn, error) {
 	addr := net.JoinHostPort(s.config.Host, s.config.Port)
 	host, err := net.ResolveUDPAddr("udp", addr)
 	if err != nil {
-		s.logger.WithError(err).Errorf("Unable to resolve: %s", addr)
+		s.logger.Error("Unable to resolve: ", addr, err.Error())
 		return nil, err
 	}
-	s.logger.Infof("Starting UDP server on: %v", host)
+	s.logger.Info("Starting UDP server on: ", host.String())
 	conn, err := net.ListenUDP("udp", host)
 	if err != nil {
-		s.logger.WithError(err).Errorf("Unable to start UDP server: %s", addr)
+		s.logger.Error("Unable to start UDP server: ", addr, err.Error())
 		return nil, err
 	}
 	return conn, err
@@ -123,7 +137,7 @@ L:
 		case <-healchCheckTicker.C:
 			s.logger.Debug("HealthCheck started")
 			if err := s.BackendPool.TargetGroup.Check(); err != nil {
-				s.logger.WithError(err).Error("Healcheck failed", err.Error())
+				s.logger.Error("Healcheck failed: ", err.Error())
 			}
 		case <-s.shutdown:
 			healchCheckTicker.Stop()
@@ -143,18 +157,18 @@ L:
 		default:
 			n, _, err := s.ListenConn.ReadFrom(b)
 			if err != nil {
-				s.logger.WithError(err).Error("Could not read a packet")
+				s.logger.Error("Could not read a packet: ", err.Error())
 				continue
 			}
 			targetConn, err := s.BackendPool.Next()
 			if err != nil {
-				s.logger.WithError(err).Error("No healthy target connections")
+				s.logger.Error("No healthy target connections: ", err.Error())
 				continue
 			}
 			s.logger.Debug("Sending packet to: ", targetConn.Conn.RemoteAddr().String())
 			_, err = targetConn.Conn.Write(b[0:n])
 			if err != nil {
-				s.logger.WithError(err).Errorf("Fail to write into: %s", targetConn.Conn.RemoteAddr().String())
+				s.logger.Error("Fail to write into: ", targetConn.Conn.RemoteAddr().String(), err.Error())
 				targetConn.SetDead()
 				continue
 			}
