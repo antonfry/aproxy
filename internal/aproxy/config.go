@@ -21,5 +21,8 @@ func NewConfig() *Config {
 }
 
 func (c *Config) String() string {
-	return fmt.Sprintf("logLevel: %s, workers: %d, host: %s, port: %s, buffer: %d", c.LogLevel, c.Workers, c.Host, c.Port, c.Buffer)
+	return fmt.Sprintf(
+		"logLevel: %s, workers: %d, host: %s, port: %s, buffer: %d",
+		c.LogLevel, c.Workers, c.Host, c.Port, c.Buffer,
+	)
 }

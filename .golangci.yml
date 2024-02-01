@@ -1,0 +1,268 @@
+linters:
+  # please, do not use enable-all: it's deprecated and will be removed soon.
+  # inverted configuration with enable-all and disable is not scalable during updates of golangci-lint
+  disable-all: true
+  enable:
+  # acceptanceTests/utils.go:84:36: response body must be closed (bodyclose)
+  #     resp, err := http.DefaultClient.Do(req)
+  - bodyclose
+
+  # internal/storage/item_update_v7.go:65: 65-103 lines are duplicate of internal/storage/item_update_v8.go:66-104 (dupl)
+  - dupl
+
+  # repository/get_items_by_ids_test.go:68:1: don't use init function (gochecknoinits)
+  # func init() {
+  # ^
+  - gochecknoinits
+
+  # repository/item_patch.go:105:8: string sellerName has 3 occurrences, make it a constant (goconst)
+  #         case "sellerName":
+  #              ^
+  - goconst
+
+  # api/core/handlers/corewriter.go:65:2: singleCaseSwitch: should rewrite switch statement to if statement (gocritic)
+  #     switch err := err.(type) {
+  #     ^
+  - gocritic
+
+  # storage/items_query_designer_utils.go:12:1: cyclomatic complexity 55 of func fieldToColumn is high (> 30) (gocyclo)
+  # func fieldToColumn(fieldId int) string {
+  # ^
+  - gocyclo
+
+  # cache/get_items_by_ids.go:150: File is not gofmt`-ed with `-s (gofmt)
+  #              }
+  - gofmt
+
+  # api/handlers/error.go:5: File is not `goimports`-ed (goimports)
+  #     "go.avito.ru/av/service-item/internal/api/utils/respond"
+  - goimports
+
+  # mapping/bloom/bloomfilter/debug.go:33:1: printf-like formatting function 'debug' should be named 'debugf' (goprintffuncname)
+  # func debug(format string, a ...interface{}) {
+  # ^
+  - goprintffuncname
+
+  # cache/get_items_by_ids.go:163:28: G601: Implicit memory aliasing in for loop. (gosec)
+  #                     pb.MergeWithRareModel(&item, itemRare)
+  #                                           ^
+  # repository/item_update_v7.go:63:25: G404: Use of weak random number generator (math/rand instead of crypto/rand) (gosec)
+  #             if !isValidParams && rand.Intn(100) < 20 {
+  #                                  ^
+  - gosec
+
+  # pi/middlewares/recover.go:24:30: happend is a misspelling of happened (misspell)
+  #                     err = fmt.Errorf("error happend (%v)", v)
+  - misspell
+
+  # api/core/handlers/corewriter.go:49:76: directive //nolint is unused (nolintlint)
+  # func (cr *CoreWriter) WriteJson(data interface{}, code int) (int, error) { //nolint
+  - nolintlint
+
+  # SA4009: argument parseStmt is overwritten before first use (staticcheck)                                                                                                                 ^
+  - staticcheck
+
+  # acceptanceTests/utils.go:55:6: ST1003: func getTestServiceUrl should be getTestServiceURL (stylecheck)
+  # func getTestServiceUrl() string {
+  #      ^
+  - stylecheck
+
+  # internal/utils/pg_array.go:63:17: unnecessary conversion (unconvert)
+  # Int:    int64(v),
+  - unconvert
+
+  # unnecessary trailing newline
+  - whitespace
+
+  # Function 'TestPadmeDataSave_Ok' is too long (68 > 60) (funlen)
+  # func TestPadmeDataSave_Ok(t *testing.T) {
+  - funlen
+
+  # range var pdId should be pdID
+  - staticcheck
+
+  # internal/cache/set_items.go:14:2: Consider preallocating keys (prealloc)
+  #     var keys []string
+  #     ^
+  - prealloc
+
+  # internal/cache/get_items_by_ids.go:142:2: if len(itemsCache) > 0 is deeply nested (complexity: 9) (nestif)
+  #     if len(itemsCache) > 0 {
+  #     ^
+  - nestif
+
+  # internal/storage/users_items_status_change.go:241:57: (*storage).UsersItemsStatusChangeRun$4 - result 0 (error) is always nil (unparam)
+  # usersItemsStatusChangeProcess := func(db *database.DB) error {
+  - unparam
+
+  # api/middlewares/recover_test.go:32:27: should rewrite http.NewRequestWithContext or add (*Request).WithContext (noctx)
+  #     req, _ := http.NewRequest("POST", "/whatever", nil)
+  # - noctx
+# repository/item_update_v7.go:93:2: naked return in func ItemUpdateV7 with 81 lines of code (nakedret)
+  #     return
+  #     ^
+  - nakedret
+
+  # without examples:
+  - govet
+  - ineffassign
+  - rowserrcheck
+  - unused
+  - typecheck
+  - gosimple
+  - errcheck
+  - dogsled
+  - asciicheck
+  - containedctx
+  - contextcheck
+  - decorder
+  - durationcheck
+  - errchkjson
+#  - errorlint
+  - execinquery
+  - exportloopref
+  - forcetypeassert
+#  - gocognit
+  - gofumpt
+  - grouper
+#  - ireturn
+  - lll
+  - makezero
+  - megacheck
+  - predeclared
+  - revive
+  - sqlclosecheck
+
+
+  - tparallel
+  - wastedassign
+
+
+
+  # don't enable
+
+  # ------------
+  # mnd: Magic number: 100, in <argument> detected (gomnd)
+  # if !isValidParams && rand.Intn(100) < 20 {
+  # - gomnd
+
+  # internal/personalData/pd/pd_data.go:110:2: missing cases in switch of type reflect.Kind: Array, Bool, Chan, Complex128, Complex64, Float32, Float64, Func, Int16, Int32, Int8, Interface, Map, Ptr, Slice, String, Struct, Uint, Uint16, Uint32, Uint64, Uint8, Uintptr, UnsafePointer (exhaustive)
+  #     switch iv.Kind() {
+  #     ^
+  # - exhaustive
+
+  # internal/system/system.go:5:5: host is a global variable (gochecknoglobals)
+  # var host string
+  #     ^
+  # - gochecknoglobals
+
+  # without examples:
+  # - godot
+  # - godox
+  # - goerr113
+  # - testpackage
+  # - wsl
+
+linters-settings:
+  govet:
+#    enable-all: true
+  gocyclo:
+    # minimal code complexity to report, 30 by default (but we recommend 10-20)
+    min-complexity: 30
+  lll:
+    line-length: 120
+    tab-width: 1
+  errorlint:
+    errorf: true
+    asserts: true
+    comparison: true
+  staticcheck:
+    # https://staticcheck.io/docs/options#checks
+    checks: [ "all" ]
+  revive:
+    rules:
+      - name: context-keys-type
+      - name: time-equal
+      - name: time-naming
+      - name: var-declaration
+      - name: unexported-return
+        disabled: true
+      - name: errorf
+      - name: blank-imports
+      - name: context-as-argument
+      - name: dot-imports
+      - name: error-return
+      - name: error-strings
+      - name: error-naming
+      - name: exported
+      - name: if-return
+      - name: increment-decrement
+      - name: var-naming # Деактивирован для возможности названия пакета в snake_case
+        disabled: true
+      - name: range
+      - name: receiver-naming
+      - name: indent-error-flow
+      - name: empty-block
+      - name: superfluous-else
+      - name: confusing-naming
+      - name: get-return
+      - name: modifies-parameter
+      - name: confusing-results
+      - name: deep-exit
+      - name: unused-parameter
+      - name: unreachable-code
+      - name: flag-parameter
+      - name: unnecessary-stmt
+      - name: struct-tag
+      - name: modifies-value-receiver
+      - name: constant-logical-expr
+      - name: bool-literal-in-expr
+      - name: redefines-builtin-id
+      - name: range-val-in-closure
+      - name: range-val-address
+      - name: waitgroup-by-value
+      - name: atomic
+      - name: empty-lines
+      - name: call-to-gc
+      - name: duplicated-imports
+      - name: import-shadowing
+      - name: bare-return
+      - name: unused-receiver
+      - name: string-of-int
+      - name: early-return
+      - name: unconditional-recursion
+      - name: identical-branches
+      - name: defer
+        arguments: [ [ "call-chain","loop","method-call","recover", "return" ] ]
+      - name: unexported-naming
+      - name: nested-structs
+      - name: useless-break
+      - name: optimize-operands-order
+
+issues:
+  exclude-use-default: true
+
+  # Excluding configuration per-path, per-linter, per-text and per-source
+  exclude-rules:
+  # Exclude some linters from running on tests files.
+  - path: _test\.go
+    linters:
+    - gocyclo
+    - errcheck
+    - dupl
+    - gosec
+    - funlen
+    - lll
+    - goconst
+  - path: ac_tests
+    linters:
+    - nolintlint
+  - linters:
+    - stylecheck
+    text: "ST1003:"
+
+run:
+  skip-dirs:
+  - ^internal/generated
+  skip-files:
+  - ".*mock.*\\.go$"

@@ -44,11 +44,11 @@ func (h *HealthCheck) TCPcheck(host string) error {
 
 func (h *HealthCheck) HTTPcheck(host string) error {
 	addr := net.JoinHostPort(host, h.Port)
-	url, err := url.JoinPath("http://", addr, h.URI)
+	healthCheckUrl, err := url.JoinPath("http://", addr, h.URI)
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequest(http.MethodGet, healthCheckUrl, nil)
 	if err != nil {
 		return err
 	}

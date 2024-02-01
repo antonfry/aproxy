@@ -8,23 +8,20 @@ import (
 	"syscall"
 	"time"
 
-	"net/http"
-	_ "net/http/pprof"
-
 	log "github.com/sirupsen/logrus"
 )
 
 // server is the main server struct
 type server struct {
 	logger      *log.Logger
-	BackendPool *roundrobin.RoundRobinPool
+	BackendPool *roundrobin.Pool
 	ListenConn  *net.UDPConn
 	config      *Config
 	shutdown    chan struct{}
 }
 
 // New create a new server struct
-func New(config *Config, pool *roundrobin.RoundRobinPool) *server {
+func New(config *Config, pool *roundrobin.Pool) *server {
 	return &server{
 		logger:      log.New(),
 		BackendPool: pool,
@@ -60,16 +57,8 @@ func (s *server) Start() error {
 	s.logger.Info("Target group: ", s.BackendPool.TargetGroup.Backends)
 	s.logger.Info("HealthCheck: ", s.BackendPool.TargetGroup.HealthCheck)
 	go s.gracefullShutdown()
-	go func() {
-		if err := http.ListenAndServe(":8080", nil); err != nil {
-			s.logger.WithError(err).Error("HTTP server crashed")
-		}
-	}()
 	<-s.shutdown
-	if err := s.Stop(); err != nil {
-		return err
-	}
-	return nil
+	return s.Stop()
 }
 
 // Stop stops server

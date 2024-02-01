@@ -24,12 +24,12 @@ var (
 func main() {
 	flag.StringVar(&configPath, "conf", "/etc/aproxy.yml", "path to yml configuration")
 	flag.Parse()
-	conf := mustConf(configPath)
+	config := mustConf(configPath)
 
-	healthCheck := healthcheck.New(&conf.Healthcheck)
-	targetGroup := targetgroup.New(&conf.Targetgroup, healthCheck)
+	healthCheck := healthcheck.New(&config.Healthcheck)
+	targetGroup := targetgroup.New(&config.Targetgroup, healthCheck)
 	pool := roundrobin.New(targetGroup)
-	server := aproxy.New(&conf.Server, pool)
+	server := aproxy.New(&config.Server, pool)
 
 	log.Info("Build version: ", buildVersion)
 	log.Info("Build date: ", buildDate)
@@ -41,14 +41,14 @@ func main() {
 }
 
 func mustConf(configPath string) conf.Config {
-	var conf conf.Config
+	var config conf.Config
 	yamlFile, err := os.ReadFile(configPath)
 	if err != nil {
 		log.WithError(err).Fatal("Unable to read configuration: ", configPath)
 	}
-	err = yaml.Unmarshal(yamlFile, &conf)
+	err = yaml.Unmarshal(yamlFile, &config)
 	if err != nil {
 		log.WithError(err).Fatal("Unable to Unmarshal configuration: ", configPath)
 	}
-	return conf
+	return config
 }

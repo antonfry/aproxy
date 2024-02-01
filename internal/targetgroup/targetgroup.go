@@ -7,7 +7,7 @@ import (
 	"fmt"
 )
 
-var ErrUnknownProto error = errors.New("unknown proto")
+var ErrUnknownProto = errors.New("unknown proto")
 
 type TargetGroup struct {
 	Backends    []*backend.UDPBackend    `json:"servers"`
